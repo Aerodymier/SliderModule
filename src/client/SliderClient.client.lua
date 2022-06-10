@@ -13,7 +13,7 @@ local sliderMarker: Frame = slidingBase:WaitForChild("Slider")
 local sliderButton: TextButton = sliderMarker:WaitForChild("Button")
 
 local textFrame: Frame = slidingBase:WaitForChild("ValueFrame")
-local valueText: TextLabel = textFrame:WaitForChild("TextLabel")
+local valueText: TextBox = textFrame:WaitForChild("TextLabel")
 
 local snapFactor = 0.05
 
