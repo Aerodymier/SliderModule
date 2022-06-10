@@ -20,19 +20,24 @@ Slider.new = function(slidingBase: Frame, sliderMarker: Frame, sliderButton: Tex
 	self.min = sliderConfigurations.min :: number
 	self.max = sliderConfigurations.max :: number
 	self.snapFactor = sliderConfigurations.snapFactor :: number
-	
+
 	self.firstPartPos = UDim2.new(slidingBase.Position.X.Scale - slidingBase.Size.X.Scale/2, 0, slidingBase.Position.Y.Scale, 0) :: UDim2
 	self.lastPartPos = UDim2.new(slidingBase.Position.X.Scale + slidingBase.Size.X.Scale/2, 0, slidingBase.Position.Y.Scale, 0) :: UDim2
 	self.lineSize = slidingBase.Size.X.Scale :: number
-	
+
 	if extras then
-		self.TargetTextBox = extras.TextBox ::TextBox
+		self.TargetTextLabel = extras.TextBox :: TextBox
+		self.TargetTextBox = extras.TextBox :: TextBox
+
+		if extras.TextLabel then
+			self.TargetTextLabel = extras.TextLabel :: TextLabel
+		end
 	end
-	
+
 	self.InteractionBegan = Instance.new("BindableEvent")
 	self.InteractionEnded = Instance.new("BindableEvent")
 	self.ValueChanged = Instance.new("BindableEvent")
-	
+
 	return self
 end
 
@@ -56,10 +61,10 @@ end
 function SliderFunctions:Activate()
 	local runServiceEvent
 	local previousValue = 0
-	
+
 	self.sliderButton.MouseButton1Down:Connect(function()
 		self.InteractionBegan:Fire()
-		
+
 		runServiceEvent = RunService.RenderStepped:Connect(function()
 			if not UIS:IsMouseButtonPressed(Enum.UserInputType.MouseButton1) then
 				runServiceEvent:Disconnect()
@@ -75,11 +80,11 @@ function SliderFunctions:Activate()
 				if xScale < 1 then
 					self.sliderMarker.Position = UDim2.new(snap(self, xScale/self.lineSize), 0, self.sliderMarker.Position.Y.Scale, 0)
 					self.CurrentValue = getText(self, snap(self, xScale/self.lineSize))
-					
-					if self.TargetTextBox then
-						self.TargetTextBox.Text = self.CurrentValue
+
+					if self.TargetTextLabel then
+						self.TargetTextLabel.Text = self.CurrentValue
 					end
-					
+
 					if previousValue ~= self.CurrentValue then
 						previousValue = self.CurrentValue
 						self.ValueChanged:Fire(self.CurrentValue)
@@ -88,12 +93,27 @@ function SliderFunctions:Activate()
 			else
 				self.sliderMarker.Position = UDim2.new(0, 0, self.sliderMarker.Position.Y.Scale, 0)
 				self.CurrentValue = getText(self, snap(self, xScale/self.lineSize))
-				
-				if self.TargetTextBox then
-					self.TargetTextBox.Text = self.CurrentValue
+
+				if self.TargetTextLabel then
+					self.TargetTextLabel.Text = self.CurrentValue
 				end
 			end
 		end)
+	end)
+
+	self.TargetTextBox.FocusLost:Connect(function()
+		local currentText = tonumber(self.TargetTextBox.Text)
+
+		if currentText then
+			if currentText < self.max and currentText > self.min then
+				self.CurrentValue = currentText
+
+				local scaleVal = currentText/(self.max - self.min)
+				self.sliderMarker.Position = UDim2.new(scaleVal, 0, self.sliderMarker.Position.Y.Scale, 0)
+			else
+				self.TargetTextBox.Text = self.CurrentValue
+			end
+		end
 	end)
 end
 
