@@ -2,6 +2,7 @@ local game = remodel.readPlaceFile("E:/Roblox/Studio/slider.rbxl")
 
 local ReplicatedStorage = game.ReplicatedStorage
 local StarterGui = game.StarterGui
+local Workspace = game.Workspace
 
 local function handleLoops(object, folderName)
     if object.ClassName == "Folder" then
@@ -23,6 +24,10 @@ local function handleLoops(object, folderName)
             remodel.writeModelFile(object, dir .. ".rbxmx")
         end
     end
+end
+
+for _, object in ipairs(Workspace:GetChildren()) do
+    remodel.writeModelFile(object, "../src/workspace/" .. object.Name .. ".rbxmx")
 end
 
 for _, object in ipairs(ReplicatedStorage:GetChildren()) do
