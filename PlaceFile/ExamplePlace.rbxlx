@@ -14,6 +14,20 @@ local Slider = {}
 local SliderFunctions = {}
 SliderFunctions.__index = SliderFunctions
 
+local function calculateScalePosFromScreenSize(frame: Frame): UDim2
+	local abs = frame.AbsolutePosition
+	local vps = workspace.CurrentCamera.ViewportSize
+
+	return UDim2.new(abs.X/vps.X, 0, abs.Y/vps.Y, 0)
+end
+
+local function calculateScaleSizeFromScreenSize(frame: Frame): UDim2
+	local abs = frame.AbsoluteSize
+	local vps = workspace.CurrentCamera.ViewportSize
+
+	return UDim2.new(abs.X/vps.X, 0, abs.Y/vps.Y, 0)
+end
+
 Slider.new = function(slidingBase: Frame, sliderMarker: Frame, sliderButton: TextButton | ImageButton, sliderConfigurations: table, extras: table)
 	local self = setmetatable({}, SliderFunctions)
 	assert(sliderConfigurations.min, "sliderConfigurations need a min variable.")
@@ -28,19 +42,26 @@ Slider.new = function(slidingBase: Frame, sliderMarker: Frame, sliderButton: Tex
 	self.min = sliderConfigurations.min :: number
 	self.max = sliderConfigurations.max :: number
 	self.snapFactor = sliderConfigurations.snapFactor :: number
-	
-	self.firstPartPos = UDim2.new(slidingBase.Position.X.Scale - slidingBase.Size.X.Scale/2, 0, slidingBase.Position.Y.Scale, 0) :: UDim2
-	self.lastPartPos = UDim2.new(slidingBase.Position.X.Scale + slidingBase.Size.X.Scale/2, 0, slidingBase.Position.Y.Scale, 0) :: UDim2
-	self.lineSize = slidingBase.Size.X.Scale :: number
-	
+
+	local slidingBaseSizeFromScreenSize = calculateScaleSizeFromScreenSize(slidingBase)
+	local slidingBasePosFromScreenSize = calculateScalePosFromScreenSize(slidingBase)
+
+	self.firstPartPos = UDim2.new(slidingBasePosFromScreenSize.X.Scale, 0, slidingBasePosFromScreenSize.Y.Scale, 0) :: UDim2
+	self.lineSize = slidingBaseSizeFromScreenSize.X.Scale :: number
+
 	if extras then
-		self.TargetTextBox = extras.TextBox ::TextBox
+		self.TargetTextLabel = extras.TextBox :: TextBox
+		self.TargetTextBox = extras.TextBox :: TextBox
+
+		if extras.TextLabel then
+			self.TargetTextLabel = extras.TextLabel :: TextLabel
+		end
 	end
-	
+
 	self.InteractionBegan = Instance.new("BindableEvent")
 	self.InteractionEnded = Instance.new("BindableEvent")
 	self.ValueChanged = Instance.new("BindableEvent")
-	
+
 	return self
 end
 
@@ -64,10 +85,10 @@ end
 function SliderFunctions:Activate()
 	local runServiceEvent
 	local previousValue = 0
-	
+
 	self.sliderButton.MouseButton1Down:Connect(function()
 		self.InteractionBegan:Fire()
-		
+
 		runServiceEvent = RunService.RenderStepped:Connect(function()
 			if not UIS:IsMouseButtonPressed(Enum.UserInputType.MouseButton1) then
 				runServiceEvent:Disconnect()
@@ -83,11 +104,11 @@ function SliderFunctions:Activate()
 				if xScale &lt; 1 then
 					self.sliderMarker.Position = UDim2.new(snap(self, xScale/self.lineSize), 0, self.sliderMarker.Position.Y.Scale, 0)
 					self.CurrentValue = getText(self, snap(self, xScale/self.lineSize))
-					
-					if self.TargetTextBox then
-						self.TargetTextBox.Text = self.CurrentValue
+
+					if self.TargetTextLabel then
+						self.TargetTextLabel.Text = self.CurrentValue
 					end
-					
+
 					if previousValue ~= self.CurrentValue then
 						previousValue = self.CurrentValue
 						self.ValueChanged:Fire(self.CurrentValue)
@@ -96,12 +117,27 @@ function SliderFunctions:Activate()
 			else
 				self.sliderMarker.Position = UDim2.new(0, 0, self.sliderMarker.Position.Y.Scale, 0)
 				self.CurrentValue = getText(self, snap(self, xScale/self.lineSize))
-				
-				if self.TargetTextBox then
-					self.TargetTextBox.Text = self.CurrentValue
+
+				if self.TargetTextLabel then
+					self.TargetTextLabel.Text = self.CurrentValue
 				end
 			end
 		end)
+	end)
+
+	self.TargetTextBox.FocusLost:Connect(function()
+		local currentText = tonumber(self.TargetTextBox.Text)
+
+		if currentText then
+			if currentText &lt; self.max and currentText > self.min then
+				self.CurrentValue = currentText
+
+				local scaleVal = currentText/(self.max - self.min)
+				self.sliderMarker.Position = UDim2.new(scaleVal, 0, self.sliderMarker.Position.Y.Scale, 0)
+			else
+				self.TargetTextBox.Text = self.CurrentValue
+			end
+		end
 	end)
 end
 
@@ -255,7 +291,7 @@ return Slider</string>
             <bool name="Visible">true</bool>
             <int name="ZIndex">1</int>
           </Properties>
-          <Item class="TextLabel" referent="6">
+          <Item class="TextBox" referent="6">
             <Properties>
               <string name="Name">TextLabel</string>
               <bool name="Active">false</bool>
@@ -280,16 +316,24 @@ return Slider</string>
               </Color3>
               <token name="BorderMode">0</token>
               <int name="BorderSizePixel">1</int>
+              <bool name="ClearTextOnFocus">true</bool>
               <bool name="ClipsDescendants">false</bool>
               <bool name="Draggable">false</bool>
               <token name="Font">3</token>
               <int name="LayoutOrder">0</int>
               <float name="LineHeight">1</float>
               <int name="MaxVisibleGraphemes">-1</int>
+              <bool name="MultiLine">false</bool>
               <Ref name="NextSelectionDown">null</Ref>
               <Ref name="NextSelectionLeft">null</Ref>
               <Ref name="NextSelectionRight">null</Ref>
               <Ref name="NextSelectionUp">null</Ref>
+              <Color3 name="PlaceholderColor3">
+                <R>0.7</R>
+                <G>0.7</G>
+                <B>0.7</B>
+              </Color3>
+              <string name="PlaceholderText"></string>
               <UDim2 name="Position">
                 <XS>0</XS>
                 <XO>0</XO>
@@ -307,6 +351,7 @@ return Slider</string>
               <bool name="SelectionGroup">false</bool>
               <Ref name="SelectionImageObject">null</Ref>
               <int name="SelectionOrder">0</int>
+              <bool name="ShowNativeInput">true</bool>
               <UDim2 name="Size">
                 <XS>1</XS>
                 <XO>0</XO>
@@ -316,12 +361,13 @@ return Slider</string>
               <token name="SizeConstraint">0</token>
               <int64 name="SourceAssetId">-1</int64>
               <BinaryString name="Tags"></BinaryString>
-              <string name="Text">Label</string>
+              <string name="Text"></string>
               <Color3 name="TextColor3">
                 <R>0</R>
                 <G>0</G>
                 <B>0</B>
               </Color3>
+              <bool name="TextEditable">true</bool>
               <bool name="TextScaled">false</bool>
               <float name="TextSize">25</float>
               <Color3 name="TextStrokeColor3">
@@ -523,7 +569,7 @@ local sliderMarker: Frame = slidingBase:WaitForChild("Slider")
 local sliderButton: TextButton = sliderMarker:WaitForChild("Button")
 
 local textFrame: Frame = slidingBase:WaitForChild("ValueFrame")
-local valueText: TextLabel = textFrame:WaitForChild("TextLabel")
+local valueText: TextBox = textFrame:WaitForChild("TextLabel")
 
 local snapFactor = 0.05
 
@@ -544,6 +590,403 @@ newSlider:Activate()</string>
           </Properties>
         </Item>
       </Item>
+    </Item>
+  </Item>
+  <Item class="Workspace" referent="13">
+    <Properties>
+      <string name="Name">Workspace</string>
+    </Properties>
+    <Item class="Part" referent="14">
+      <Properties>
+        <string name="Name">Baseplate</string>
+        <bool name="Anchored">true</bool>
+        <BinaryString name="AttributesSerialize">
+        </BinaryString>
+        <float name="BackParamA">-0.5</float>
+        <float name="BackParamB">0.5</float>
+        <token name="BackSurface">0</token>
+        <token name="BackSurfaceInput">0</token>
+        <float name="BottomParamA">-0.5</float>
+        <float name="BottomParamB">0.5</float>
+        <token name="BottomSurface">0</token>
+        <token name="BottomSurfaceInput">0</token>
+        <CoordinateFrame name="CFrame">
+          <X>0</X>
+          <Y>-8</Y>
+          <Z>0</Z>
+          <R00>1</R00>
+          <R01>0</R01>
+          <R02>0</R02>
+          <R10>0</R10>
+          <R11>1</R11>
+          <R12>0</R12>
+          <R20>0</R20>
+          <R21>0</R21>
+          <R22>1</R22>
+        </CoordinateFrame>
+        <bool name="CanCollide">true</bool>
+        <bool name="CanQuery">true</bool>
+        <bool name="CanTouch">true</bool>
+        <bool name="CastShadow">true</bool>
+        <int name="CollisionGroupId">0</int>
+        <Color3uint8 name="Color3uint8">5987163</Color3uint8>
+        <PhysicalProperties name="CustomPhysicalProperties">
+          <CustomPhysics>false</CustomPhysics>
+        </PhysicalProperties>
+        <token name="formFactorRaw">0</token>
+        <float name="FrontParamA">-0.5</float>
+        <float name="FrontParamB">0.5</float>
+        <token name="FrontSurface">0</token>
+        <token name="FrontSurfaceInput">0</token>
+        <float name="LeftParamA">-0.5</float>
+        <float name="LeftParamB">0.5</float>
+        <token name="LeftSurface">0</token>
+        <token name="LeftSurfaceInput">0</token>
+        <bool name="Locked">true</bool>
+        <bool name="Massless">false</bool>
+        <token name="Material">256</token>
+        <BinaryString name="MaterialVariantSerialized">
+        </BinaryString>
+        <CoordinateFrame name="PivotOffset">
+          <X>0</X>
+          <Y>0</Y>
+          <Z>0</Z>
+          <R00>1</R00>
+          <R01>0</R01>
+          <R02>0</R02>
+          <R10>0</R10>
+          <R11>1</R11>
+          <R12>0</R12>
+          <R20>0</R20>
+          <R21>0</R21>
+          <R22>1</R22>
+        </CoordinateFrame>
+        <float name="Reflectance">0</float>
+        <float name="RightParamA">-0.5</float>
+        <float name="RightParamB">0.5</float>
+        <token name="RightSurface">0</token>
+        <token name="RightSurfaceInput">0</token>
+        <int name="RootPriority">0</int>
+        <Vector3 name="RotVelocity">
+          <X>0</X>
+          <Y>0</Y>
+          <Z>0</Z>
+        </Vector3>
+        <token name="shape">1</token>
+        <Vector3 name="size">
+          <X>2048</X>
+          <Y>16</Y>
+          <Z>2048</Z>
+        </Vector3>
+        <int64 name="SourceAssetId">-1</int64>
+        <BinaryString name="Tags"></BinaryString>
+        <float name="TopParamA">-0.5</float>
+        <float name="TopParamB">0.5</float>
+        <token name="TopSurface">0</token>
+        <token name="TopSurfaceInput">0</token>
+        <float name="Transparency">0</float>
+        <Vector3 name="Velocity">
+          <X>0</X>
+          <Y>0</Y>
+          <Z>0</Z>
+        </Vector3>
+      </Properties>
+      <Item class="Texture" referent="15">
+        <Properties>
+          <string name="Name">Texture</string>
+          <BinaryString name="AttributesSerialize">
+          </BinaryString>
+          <Color3 name="Color3">
+            <R>0</R>
+            <G>0</G>
+            <B>0</B>
+          </Color3>
+          <token name="Face">1</token>
+          <float name="OffsetStudsU">0</float>
+          <float name="OffsetStudsV">0</float>
+          <int64 name="SourceAssetId">-1</int64>
+          <float name="StudsPerTileU">8</float>
+          <float name="StudsPerTileV">8</float>
+          <BinaryString name="Tags"></BinaryString>
+          <Content name="Texture">
+            <url>rbxassetid://6372755229</url>
+          </Content>
+          <float name="Transparency">0.8</float>
+          <int name="ZIndex">1</int>
+        </Properties>
+      </Item>
+    </Item>
+    <Item class="Camera" referent="16">
+      <Properties>
+        <string name="Name">Camera</string>
+        <BinaryString name="AttributesSerialize">
+        </BinaryString>
+        <CoordinateFrame name="CFrame">
+          <X>-23.48382</X>
+          <Y>16.005564</Y>
+          <Z>-22.594118</Z>
+          <R00>-0.95892954</R00>
+          <R01>-0.18673454</R01>
+          <R02>0.21350482</R02>
+          <R10>-0</R10>
+          <R11>0.7527202</R11>
+          <R12>0.6583405</R12>
+          <R20>-0.28364432</R20>
+          <R21>0.6313022</R21>
+          <R22>-0.72180563</R22>
+        </CoordinateFrame>
+        <Ref name="CameraSubject">null</Ref>
+        <token name="CameraType">0</token>
+        <float name="FieldOfView">70</float>
+        <token name="FieldOfViewMode">0</token>
+        <CoordinateFrame name="Focus">
+          <X>-23.91083</X>
+          <Y>14.688883</Y>
+          <Z>-21.150507</Z>
+          <R00>1</R00>
+          <R01>0</R01>
+          <R02>0</R02>
+          <R10>0</R10>
+          <R11>1</R11>
+          <R12>0</R12>
+          <R20>0</R20>
+          <R21>0</R21>
+          <R22>1</R22>
+        </CoordinateFrame>
+        <bool name="HeadLocked">true</bool>
+        <float name="HeadScale">1</float>
+        <int64 name="SourceAssetId">-1</int64>
+        <BinaryString name="Tags"></BinaryString>
+      </Properties>
+    </Item>
+    <Item class="SpawnLocation" referent="17">
+      <Properties>
+        <string name="Name">SpawnLocation</string>
+        <bool name="AllowTeamChangeOnTouch">false</bool>
+        <bool name="Anchored">true</bool>
+        <BinaryString name="AttributesSerialize">
+        </BinaryString>
+        <float name="BackParamA">-0.5</float>
+        <float name="BackParamB">0.5</float>
+        <token name="BackSurface">0</token>
+        <token name="BackSurfaceInput">0</token>
+        <float name="BottomParamA">-0.5</float>
+        <float name="BottomParamB">0.5</float>
+        <token name="BottomSurface">0</token>
+        <token name="BottomSurfaceInput">0</token>
+        <CoordinateFrame name="CFrame">
+          <X>0</X>
+          <Y>0.5</Y>
+          <Z>0</Z>
+          <R00>1</R00>
+          <R01>0</R01>
+          <R02>0</R02>
+          <R10>0</R10>
+          <R11>1</R11>
+          <R12>0</R12>
+          <R20>0</R20>
+          <R21>0</R21>
+          <R22>1</R22>
+        </CoordinateFrame>
+        <bool name="CanCollide">true</bool>
+        <bool name="CanQuery">true</bool>
+        <bool name="CanTouch">true</bool>
+        <bool name="CastShadow">true</bool>
+        <int name="CollisionGroupId">0</int>
+        <Color3uint8 name="Color3uint8">10724005</Color3uint8>
+        <PhysicalProperties name="CustomPhysicalProperties">
+          <CustomPhysics>false</CustomPhysics>
+        </PhysicalProperties>
+        <int name="Duration">0</int>
+        <bool name="Enabled">true</bool>
+        <token name="formFactorRaw">1</token>
+        <float name="FrontParamA">-0.5</float>
+        <float name="FrontParamB">0.5</float>
+        <token name="FrontSurface">0</token>
+        <token name="FrontSurfaceInput">0</token>
+        <float name="LeftParamA">-0.5</float>
+        <float name="LeftParamB">0.5</float>
+        <token name="LeftSurface">0</token>
+        <token name="LeftSurfaceInput">0</token>
+        <bool name="Locked">false</bool>
+        <bool name="Massless">false</bool>
+        <token name="Material">256</token>
+        <BinaryString name="MaterialVariantSerialized">
+        </BinaryString>
+        <bool name="Neutral">true</bool>
+        <CoordinateFrame name="PivotOffset">
+          <X>0</X>
+          <Y>0</Y>
+          <Z>0</Z>
+          <R00>1</R00>
+          <R01>0</R01>
+          <R02>0</R02>
+          <R10>0</R10>
+          <R11>1</R11>
+          <R12>0</R12>
+          <R20>0</R20>
+          <R21>0</R21>
+          <R22>1</R22>
+        </CoordinateFrame>
+        <float name="Reflectance">0</float>
+        <float name="RightParamA">-0.5</float>
+        <float name="RightParamB">0.5</float>
+        <token name="RightSurface">0</token>
+        <token name="RightSurfaceInput">0</token>
+        <int name="RootPriority">0</int>
+        <Vector3 name="RotVelocity">
+          <X>0</X>
+          <Y>0</Y>
+          <Z>0</Z>
+        </Vector3>
+        <token name="shape">1</token>
+        <Vector3 name="size">
+          <X>12</X>
+          <Y>1</Y>
+          <Z>12</Z>
+        </Vector3>
+        <int64 name="SourceAssetId">-1</int64>
+        <BinaryString name="Tags"></BinaryString>
+        <int name="TeamColor">194</int>
+        <float name="TopParamA">-0.5</float>
+        <float name="TopParamB">0.5</float>
+        <token name="TopSurface">0</token>
+        <token name="TopSurfaceInput">0</token>
+        <float name="Transparency">0</float>
+        <Vector3 name="Velocity">
+          <X>0</X>
+          <Y>0</Y>
+          <Z>0</Z>
+        </Vector3>
+      </Properties>
+      <Item class="Decal" referent="18">
+        <Properties>
+          <string name="Name">Decal</string>
+          <BinaryString name="AttributesSerialize">
+          </BinaryString>
+          <Color3 name="Color3">
+            <R>1</R>
+            <G>1</G>
+            <B>1</B>
+          </Color3>
+          <token name="Face">1</token>
+          <int64 name="SourceAssetId">-1</int64>
+          <BinaryString name="Tags"></BinaryString>
+          <Content name="Texture">
+            <url>rbxasset://textures/SpawnLocation.png</url>
+          </Content>
+          <float name="Transparency">0</float>
+          <int name="ZIndex">1</int>
+        </Properties>
+      </Item>
+    </Item>
+    <Item class="Terrain" referent="19">
+      <Properties>
+        <string name="Name">Terrain</string>
+        <token name="AcquisitionMethod">0</token>
+        <bool name="Anchored">true</bool>
+        <BinaryString name="AttributesSerialize">
+        </BinaryString>
+        <float name="BackParamA">-0.5</float>
+        <float name="BackParamB">0.5</float>
+        <token name="BackSurface">0</token>
+        <token name="BackSurfaceInput">0</token>
+        <float name="BottomParamA">-0.5</float>
+        <float name="BottomParamB">0.5</float>
+        <token name="BottomSurface">4</token>
+        <token name="BottomSurfaceInput">0</token>
+        <CoordinateFrame name="CFrame">
+          <X>0</X>
+          <Y>0</Y>
+          <Z>0</Z>
+          <R00>1</R00>
+          <R01>0</R01>
+          <R02>0</R02>
+          <R10>0</R10>
+          <R11>1</R11>
+          <R12>0</R12>
+          <R20>0</R20>
+          <R21>0</R21>
+          <R22>1</R22>
+        </CoordinateFrame>
+        <bool name="CanCollide">true</bool>
+        <bool name="CanQuery">true</bool>
+        <bool name="CanTouch">true</bool>
+        <bool name="CastShadow">true</bool>
+        <int name="CollisionGroupId">0</int>
+        <Color3uint8 name="Color3uint8">10724005</Color3uint8>
+        <PhysicalProperties name="CustomPhysicalProperties">
+          <CustomPhysics>false</CustomPhysics>
+        </PhysicalProperties>
+        <bool name="Decoration">true</bool>
+        <float name="FrontParamA">-0.5</float>
+        <float name="FrontParamB">0.5</float>
+        <token name="FrontSurface">0</token>
+        <token name="FrontSurfaceInput">0</token>
+        <float name="LeftParamA">-0.5</float>
+        <float name="LeftParamB">0.5</float>
+        <token name="LeftSurface">0</token>
+        <token name="LeftSurfaceInput">0</token>
+        <bool name="Locked">true</bool>
+        <bool name="Massless">false</bool>
+        <token name="Material">256</token>
+        <BinaryString name="MaterialColors"><![CDATA[AAAAAAAAan8/P39rf2Y/ilY+j35fi21PZmxvZbDqw8faiVpHOi4kHh4lZlw76JxKc3trhHtagcLgc4RKxr21zq2UlJSM]]></BinaryString>
+        <BinaryString name="MaterialVariantSerialized">
+        </BinaryString>
+        <BinaryString name="PhysicsGrid"><![CDATA[AgMAAAAAAAAAAAAAAAA=]]></BinaryString>
+        <CoordinateFrame name="PivotOffset">
+          <X>0</X>
+          <Y>0</Y>
+          <Z>0</Z>
+          <R00>1</R00>
+          <R01>0</R01>
+          <R02>0</R02>
+          <R10>0</R10>
+          <R11>1</R11>
+          <R12>0</R12>
+          <R20>0</R20>
+          <R21>0</R21>
+          <R22>1</R22>
+        </CoordinateFrame>
+        <float name="Reflectance">0</float>
+        <float name="RightParamA">-0.5</float>
+        <float name="RightParamB">0.5</float>
+        <token name="RightSurface">0</token>
+        <token name="RightSurfaceInput">0</token>
+        <int name="RootPriority">0</int>
+        <Vector3 name="RotVelocity">
+          <X>0</X>
+          <Y>0</Y>
+          <Z>0</Z>
+        </Vector3>
+        <Vector3 name="size">
+          <X>2044</X>
+          <Y>252</Y>
+          <Z>2044</Z>
+        </Vector3>
+        <BinaryString name="SmoothGrid"><![CDATA[AQU=]]></BinaryString>
+        <int64 name="SourceAssetId">-1</int64>
+        <BinaryString name="Tags"></BinaryString>
+        <float name="TopParamA">-0.5</float>
+        <float name="TopParamB">0.5</float>
+        <token name="TopSurface">3</token>
+        <token name="TopSurfaceInput">0</token>
+        <float name="Transparency">0</float>
+        <Vector3 name="Velocity">
+          <X>0</X>
+          <Y>0</Y>
+          <Z>0</Z>
+        </Vector3>
+        <Color3 name="WaterColor">
+          <R>0.04705883</R>
+          <G>0.32941177</G>
+          <B>0.36078432</B>
+        </Color3>
+        <float name="WaterReflectance">1</float>
+        <float name="WaterTransparency">0.3</float>
+        <float name="WaterWaveSize">0.15</float>
+        <float name="WaterWaveSpeed">10</float>
+      </Properties>
     </Item>
   </Item>
 </roblox>
