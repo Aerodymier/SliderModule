@@ -9,7 +9,7 @@ You can get the module with copying the module from src/shared or you can use Wa
 Add this to your [dependencies]:
 
 ```
-SliderModule = "aerodymier/slidermodule@^0.1.1"
+SliderModule = "aerodymier/slidermodule@^0.1.2"
 ```
 
 ## Usage
