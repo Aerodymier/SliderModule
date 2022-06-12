@@ -6,6 +6,20 @@ local Slider = {}
 local SliderFunctions = {}
 SliderFunctions.__index = SliderFunctions
 
+local function calculateScalePosFromScreenSize(frame: Frame): UDim2
+	local abs = frame.AbsolutePosition
+	local vps = workspace.CurrentCamera.ViewportSize
+
+	return UDim2.new(abs.X/vps.X, 0, abs.Y/vps.Y, 0)
+end
+
+local function calculateScaleSizeFromScreenSize(frame: Frame): UDim2
+	local abs = frame.AbsoluteSize
+	local vps = workspace.CurrentCamera.ViewportSize
+
+	return UDim2.new(abs.X/vps.X, 0, abs.Y/vps.Y, 0)
+end
+
 Slider.new = function(slidingBase: Frame, sliderMarker: Frame, sliderButton: TextButton | ImageButton, sliderConfigurations: table, extras: table)
 	local self = setmetatable({}, SliderFunctions)
 	assert(sliderConfigurations.min, "sliderConfigurations need a min variable.")
@@ -21,9 +35,11 @@ Slider.new = function(slidingBase: Frame, sliderMarker: Frame, sliderButton: Tex
 	self.max = sliderConfigurations.max :: number
 	self.snapFactor = sliderConfigurations.snapFactor :: number
 
-	self.firstPartPos = UDim2.new(slidingBase.Position.X.Scale - slidingBase.Size.X.Scale/2, 0, slidingBase.Position.Y.Scale, 0) :: UDim2
-	self.lastPartPos = UDim2.new(slidingBase.Position.X.Scale + slidingBase.Size.X.Scale/2, 0, slidingBase.Position.Y.Scale, 0) :: UDim2
-	self.lineSize = slidingBase.Size.X.Scale :: number
+	local slidingBaseSizeFromScreenSize = calculateScaleSizeFromScreenSize(slidingBase)
+	local slidingBasePosFromScreenSize = calculateScalePosFromScreenSize(slidingBase)
+
+	self.firstPartPos = UDim2.new(slidingBasePosFromScreenSize.X.Scale, 0, slidingBasePosFromScreenSize.Y.Scale, 0) :: UDim2
+	self.lineSize = slidingBaseSizeFromScreenSize.X.Scale :: number
 
 	if extras then
 		self.TargetTextLabel = extras.TextBox :: TextBox
