@@ -125,20 +125,23 @@ function SliderFunctions:Activate()
 		end)
 	end)
 
-	self.TargetTextBox.FocusLost:Connect(function()
-		local currentText = tonumber(self.TargetTextBox.Text)
-
-		if currentText then
-			if currentText &lt; self.max and currentText > self.min then
-				self.CurrentValue = currentText
-
-				local scaleVal = currentText/(self.max - self.min)
-				self.sliderMarker.Position = UDim2.new(scaleVal, 0, self.sliderMarker.Position.Y.Scale, 0)
-			else
-				self.TargetTextBox.Text = self.CurrentValue
+	if self.TargetTextBox then
+		self.TargetTextBox.FocusLost:Connect(function()
+			local currentText = tonumber(self.TargetTextBox.Text)
+	
+			if currentText then
+				if currentText &lt; self.max and currentText > self.min then
+					self.CurrentValue = currentText
+	
+					local scaleVal = currentText/(self.max - self.min)
+					self.sliderMarker.Position = UDim2.new(scaleVal, 0, self.sliderMarker.Position.Y.Scale, 0)
+					self.ValueChanged:Fire(self.CurrentValue)
+				else
+					self.TargetTextBox.Text = self.CurrentValue
+				end
 			end
-		end
-	end)
+		end)
+	end
 end
 
 return Slider</string>
@@ -571,7 +574,7 @@ local sliderButton: TextButton = sliderMarker:WaitForChild("Button")
 local textFrame: Frame = slidingBase:WaitForChild("ValueFrame")
 local valueText: TextBox = textFrame:WaitForChild("TextLabel")
 
-local snapFactor = 0.05
+local snapFactor = 0.1
 
 local min = 0
 local max = 50
@@ -586,7 +589,19 @@ local newSlider = SliderModule.new(slidingBase, sliderMarker, sliderButton,
     TextBox = valueText
 })
 
-newSlider:Activate()</string>
+newSlider:Activate()
+
+newSlider.InteractionBegan.Event:Connect(function()
+    print("Interaction began.")
+end)
+
+newSlider.InteractionEnded.Event:Connect(function(finalValue: number)
+    print("Interaction ended, final value is " .. finalValue)
+end)
+
+newSlider.ValueChanged.Event:Connect(function(newValue: number)
+    print("Value changed, new value is " .. newValue)
+end)</string>
           </Properties>
         </Item>
       </Item>

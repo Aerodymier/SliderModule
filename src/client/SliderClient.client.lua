@@ -15,7 +15,7 @@ local sliderButton: TextButton = sliderMarker:WaitForChild("Button")
 local textFrame: Frame = slidingBase:WaitForChild("ValueFrame")
 local valueText: TextBox = textFrame:WaitForChild("TextLabel")
 
-local snapFactor = 0.05
+local snapFactor = 0.1
 
 local min = 0
 local max = 50
@@ -31,3 +31,15 @@ local newSlider = SliderModule.new(slidingBase, sliderMarker, sliderButton,
 })
 
 newSlider:Activate()
+
+newSlider.InteractionBegan.Event:Connect(function()
+    print("Interaction began.")
+end)
+
+newSlider.InteractionEnded.Event:Connect(function(finalValue: number)
+    print("Interaction ended, final value is " .. finalValue)
+end)
+
+newSlider.ValueChanged.Event:Connect(function(newValue: number)
+    print("Value changed, new value is " .. newValue)
+end)
