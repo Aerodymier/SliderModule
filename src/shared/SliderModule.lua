@@ -117,20 +117,23 @@ function SliderFunctions:Activate()
 		end)
 	end)
 
-	self.TargetTextBox.FocusLost:Connect(function()
-		local currentText = tonumber(self.TargetTextBox.Text)
-
-		if currentText then
-			if currentText < self.max and currentText > self.min then
-				self.CurrentValue = currentText
-
-				local scaleVal = currentText/(self.max - self.min)
-				self.sliderMarker.Position = UDim2.new(scaleVal, 0, self.sliderMarker.Position.Y.Scale, 0)
-			else
-				self.TargetTextBox.Text = self.CurrentValue
+	if self.TargetTextBox then
+		self.TargetTextBox.FocusLost:Connect(function()
+			local currentText = tonumber(self.TargetTextBox.Text)
+	
+			if currentText then
+				if currentText < self.max and currentText > self.min then
+					self.CurrentValue = currentText
+	
+					local scaleVal = currentText/(self.max - self.min)
+					self.sliderMarker.Position = UDim2.new(scaleVal, 0, self.sliderMarker.Position.Y.Scale, 0)
+					self.ValueChanged:Fire(self.CurrentValue)
+				else
+					self.TargetTextBox.Text = self.CurrentValue
+				end
 			end
-		end
-	end)
+		end)
+	end
 end
 
 return Slider
