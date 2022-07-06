@@ -12,6 +12,10 @@ Add this to your [dependencies]:
 SliderModule = "aerodymier/slidermodule@^0.1.2"
 ```
 
+... or just get it from Roblox creator marketplace:
+
+https://www.roblox.com/library/10138561854/SliderModule
+
 ## Usage
 You can create a new Slider instance with ``SliderModule.new()``:
 
