@@ -4,23 +4,23 @@ local Players = game:GetService("Players")
 local SliderModule: any = require(ReplicatedStorage.SliderModule)
 
 local plr: Player = Players.LocalPlayer
-local plrGui: PlayerGui = plr:WaitForChild("PlayerGui")
+local plrGui = plr:WaitForChild("PlayerGui") :: PlayerGui
 
-local sliderGui: ScreenGui = plrGui:WaitForChild("ScreenGui")
-local slidingBase: Frame = sliderGui:WaitForChild("SlidingPart")
+local sliderGui = plrGui:WaitForChild("ScreenGui") :: ScreenGui
+local slidingBase= sliderGui:WaitForChild("SlidingPart") :: Frame
 
-local sliderMarker: Frame = slidingBase:WaitForChild("Slider")
-local sliderButton: TextButton = sliderMarker:WaitForChild("Button")
+local sliderMarker = slidingBase:WaitForChild("Slider") :: Frame
+local sliderButton = sliderMarker:WaitForChild("Button") :: TextButton
 
-local textFrame: Frame = slidingBase:WaitForChild("ValueFrame")
-local valueText: TextBox = textFrame:WaitForChild("TextLabel")
+local textFrame = slidingBase:WaitForChild("ValueFrame") :: Frame
+local valueText = textFrame:WaitForChild("TextLabel") :: TextBox
 
 local snapFactor = 0.1
 
 local min = 0
 local max = 50
 
-local newSlider = SliderModule.new(slidingBase, sliderMarker, sliderButton, 
+local newSlider: SliderModule.slider = SliderModule.new(slidingBase, sliderMarker, sliderButton, 
 {
     min = min,
     max = max,
