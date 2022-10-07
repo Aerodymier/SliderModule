@@ -68,6 +68,10 @@ Slider.new = function(slidingBase: Frame, sliderMarker: Frame, sliderButton: Tex
 		if extras.TextLabel then
 			self.TargetTextLabel = extras.TextLabel
 		end
+
+		if extras.Decimals then
+			self.Decimals = extras.Decimals
+		end
 	end
 
 	self.InteractionBegan = Instance.new("BindableEvent") :: BindableEvent
@@ -93,7 +97,7 @@ local function getText(self: slider, snapN: number): number
 	local ratio = 1 / self.snapFactor
 	local step = (self.max - self.min) / ratio
 
-	return decimalRound(step * (snapN / self.snapFactor), 1)
+	return decimalRound(step * (snapN / self.snapFactor), self.Decimals or 1)
 end
 
 function SliderFunctions:Activate()
