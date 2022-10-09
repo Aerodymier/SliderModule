@@ -1,31 +1,6 @@
 {
-  "name": "SliderModule",
-  "tree": {
-    "$className": "DataModel",
-
-    "Workspace": {
-      "$className": "Workspace",
-      "$path": "src/workspace"
-    },
-
-    "ReplicatedStorage": {
-      "$className": "ReplicatedStorage",
-      "$path": "src/shared"
-    },
-
-    "StarterGui" : {
-      "$className": "StarterGui",
-      "$path": "src/startergui"
-    },
-
-    "StarterPlayer": {
-      "$className": "StarterPlayer",
-      "StarterPlayerScripts": {
-        "$className": "StarterPlayerScripts",
-        "Client": {
-          "$path": "src/client"
-        }
-      }
-    }
-  }
+	"name": "SliderModule",
+	"tree": {
+		"$path": "SliderModule"
+	}
 }
