@@ -1,0 +1,30 @@
+name: CI
+
+on:
+  push:
+    branches:
+    - master
+  pull_request:
+    branches:
+    - master
+
+jobs:
+  # Linting process with Selene
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Setup Aftman
+      uses: ok-nick/setup-aftman@v0.1.0
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        trust-check: false
+        version: 'v0.2.6'
+
+    # Run selene against the src directory
+    - name: Lint
+      run: |
+        selene ./src
