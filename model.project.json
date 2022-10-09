@@ -1,10 +1,10 @@
 {
-    "name": "SliderModule",
+    "name": "slidermodule",
     "tree": {
         "$className": "Folder",
         "src": {
             "$className": "Folder",
-            "$path": "src/SliderModule"
+            "$path": "SliderModule"
         }
     }
 }

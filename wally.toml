@@ -5,4 +5,4 @@ registry = "https://github.com/UpliftGames/wally-index"
 realm = "shared"
 description = "Slider module for making sliders. Repo link: https://github.com/Aerodymier/SliderModule"
 
-exclude = ["ExampleProject", ".remodel"]
+[dependencies]
