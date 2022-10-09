@@ -1,7 +1,7 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
 
-local SliderModule: any = require(ReplicatedStorage.SliderModule)
+local SliderModule: any = require(ReplicatedStorage.Packages.SliderModule)
 
 local plr: Player = Players.LocalPlayer
 local plrGui = plr:WaitForChild("PlayerGui") :: PlayerGui

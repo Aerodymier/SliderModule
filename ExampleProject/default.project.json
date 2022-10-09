@@ -10,7 +10,9 @@
 
     "ReplicatedStorage": {
       "$className": "ReplicatedStorage",
-      "$path": "src/shared"
+      "Packages": {
+        "$path": "Packages"
+      }
     },
 
     "StarterGui" : {
