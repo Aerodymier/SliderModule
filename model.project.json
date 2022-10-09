@@ -3,7 +3,6 @@
     "tree": {
         "$className": "Folder",
         "src": {
-            "$className": "Folder",
             "$path": "SliderModule"
         }
     }
