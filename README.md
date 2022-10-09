@@ -16,6 +16,8 @@ SliderModule = "aerodymier/slidermodule@^0.2.0"
 
 https://www.roblox.com/library/10138561854/SliderModule
 
+If you want to use Roblox Studio in your project I recommend downloading the module file on Releases tab.
+
 ## Usage
 You can create a new Slider instance with ``SliderModule.new()``:
 
