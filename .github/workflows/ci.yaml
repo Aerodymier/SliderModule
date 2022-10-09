@@ -27,4 +27,5 @@ jobs:
     # Run selene against the src directory
     - name: Lint
       run: |
-        selene ./src
+        selene ./SliderModule
+        selene ./ExampleProject/src
