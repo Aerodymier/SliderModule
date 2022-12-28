@@ -68,5 +68,3 @@ There are some events with a ``Slider`` object as well.
 ## Examples
 There is also an example of this module working in this repo. Place file is in PlaceFile folder and all scripts are located in src folder.
 Warning for beginners, do not sync this with your own project. The default.project.json file is set to overwriting the contents of target services. Instead, you should copy the module or use Wally.
-
-Wally install is broken at the moment.
