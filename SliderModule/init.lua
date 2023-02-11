@@ -151,7 +151,7 @@ function SliderFunctions:Activate()
 				if currentText < self.max and currentText > self.min then
 					self.CurrentValue = tostring(currentText)
 
-					local scaleVal = currentText / (self.max - self.min)
+					local scaleVal = (currentText - self.min) / (self.max - self.min)
 					self.sliderMarker.Position = UDim2.new(scaleVal, 0, self.sliderMarker.Position.Y.Scale, 0)
 					self.ValueChanged:Fire(self.CurrentValue)
 					self.InteractionEnded:Fire(self.CurrentValue)
