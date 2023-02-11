@@ -96,8 +96,8 @@ end
 local function getText(self: slider, snapN: number): number
 	local ratio = 1 / self.snapFactor
 	local step = (self.max - self.min) / ratio
-
-	return decimalRound(step * (snapN / self.snapFactor), self.Decimals or 1)
+	
+	return decimalRound(self.min + (step * (snapN / self.snapFactor)), self.Decimals or 1)
 end
 
 function SliderFunctions:Activate()
