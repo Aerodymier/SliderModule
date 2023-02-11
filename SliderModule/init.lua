@@ -156,7 +156,9 @@ function SliderFunctions:Activate()
 					self.ValueChanged:Fire(self.CurrentValue)
 					self.InteractionEnded:Fire(self.CurrentValue)
 				else
-					self.TargetTextBox.Text = self.CurrentValue
+					if self.CurrentValue then
+						self.TargetTextBox.Text = self.CurrentValue
+					end
 				end
 			end
 		end)
