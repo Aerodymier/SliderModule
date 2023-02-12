@@ -9,7 +9,7 @@ You can get the module with copying the module from src/shared or you can use Wa
 Add this to your [dependencies]:
 
 ```
-SliderModule = "aerodymier/slidermodule@^0.2.3"
+SliderModule = "aerodymier/slidermodule@^0.2.4"
 ```
 
 ... or just get it from Roblox creator marketplace (might be out of date):
