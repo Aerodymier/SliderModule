@@ -27,7 +27,8 @@ local newSlider: SliderModule.slider = SliderModule.new(slidingBase, sliderMarke
     snapFactor = snapFactor
 }, 
 {
-    TextBox = valueText
+    TextBox = valueText,
+    DefaultValue = 25,
 })
 
 newSlider:Activate()

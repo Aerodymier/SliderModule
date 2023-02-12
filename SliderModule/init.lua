@@ -9,7 +9,9 @@ type sliderConfigurationsType = {
 
 type extrasType = {
 	TextBox: TextBox?,
-	TextLabel: any
+	TextLabel: any,
+	Decimals: number,
+	DefaultValue: number,
 }
 
 type sliderFunctionsType = {
@@ -72,11 +74,17 @@ Slider.new = function(slidingBase: Frame, sliderMarker: Frame, sliderButton: Tex
 		if extras.Decimals then
 			self.Decimals = extras.Decimals
 		end
+		
+		if extras.DefaultValue then
+			self.DefaultValue = extras.DefaultValue
+		end
 	end
 
 	self.InteractionBegan = Instance.new("BindableEvent") :: BindableEvent
 	self.InteractionEnded = Instance.new("BindableEvent") :: BindableEvent
 	self.ValueChanged = Instance.new("BindableEvent") :: BindableEvent
+	
+	self.DidSetup = false :: boolean
 
 	return self
 end
@@ -103,7 +111,21 @@ end
 function SliderFunctions:Activate()
 	local runServiceEvent
 	local previousValue = 0
-
+	
+	if not self.DidSetup and self.DefaultValue then
+		previousValue = self.DefaultValue
+		
+		local scaleVal = (self.DefaultValue-self.min)/(self.max - self.min)
+		self.sliderMarker.Position = UDim2.new(scaleVal, 0, self.sliderMarker.Position.Y.Scale, 0)
+		self.CurrentValue = self.DefaultValue
+		
+		if self.TargetTextLabel then
+			self.TargetTextLabel.Text = self.DefaultValue
+		end
+		
+		self.DidSetup = true
+	end
+	
 	self.sliderButton.MouseButton1Down:Connect(function()
 		self.InteractionBegan:Fire()
 
