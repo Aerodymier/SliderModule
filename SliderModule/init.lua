@@ -85,6 +85,7 @@ Slider.new = function(slidingBase: Frame, sliderMarker: Frame, sliderButton: Tex
 	self.ValueChanged = Instance.new("BindableEvent") :: BindableEvent
 	
 	self.DidSetup = false :: boolean
+	self.Connections = {} :: {[number]: RBXScriptConnection}
 
 	return self
 end
@@ -126,15 +127,20 @@ function SliderFunctions:Activate()
 		self.DidSetup = true
 	end
 	
-	self.sliderButton.MouseButton1Down:Connect(function()
+	self.Connections[#self.Connections+1] = self.sliderButton.MouseButton1Down:Connect(function()
 		self.InteractionBegan:Fire()
 
 		runServiceEvent = RunService.RenderStepped:Connect(function()
+			local index = #self.Connections+1
+			self.Connections[index] = runServiceEvent
+
 			if not UIS:IsMouseButtonPressed(Enum.UserInputType.MouseButton1) then
 				runServiceEvent:Disconnect()
+				self.Connections[index] = nil
 				self.InteractionEnded:Fire(self.CurrentValue)
 				return
 			end
+			
 			local vpX: number = workspace.Camera.ViewportSize.X
 			local mouseLoc: Vector2 = UIS:GetMouseLocation()
 
@@ -166,7 +172,7 @@ function SliderFunctions:Activate()
 	end)
 
 	if self.TargetTextBox then
-		self.TargetTextBox.FocusLost:Connect(function()
+		self.Connections[#self.Connections+1] = self.TargetTextBox.FocusLost:Connect(function()
 			local currentText = tonumber(self.TargetTextBox.Text)
 
 			if currentText then
@@ -185,6 +191,16 @@ function SliderFunctions:Activate()
 			end
 		end)
 	end
+end
+
+function SliderFunctions:Deactivate()
+	for _, connection: RBXScriptConnection in ipairs(self.Connections) do
+		if connection.Connected then
+			connection:Disconnect()
+		end
+	end
+
+	self.Connections = {}
 end
 
 return Slider

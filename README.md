@@ -51,7 +51,16 @@ Fifth variable is ``extras``. This one can have a ``TextBox`` or a ``TextLabel``
 - ``TextLabel``: The TextLabel which will get updated when value changes. Has priority over ``TextBox`` on displaying values. (Type: TextLabel)
 - ``TextBox``: If you want the player to set a custom value between ``min`` and ``max`` values manually, use this. This applies the user specified value to ``self.CurrentValue`` when focus is lost from the TextBox with also moving the marker to the suitable location. Has required checks for number entries. If a ``TextLabel`` is not specified, this will get used on displaying values. (Type: TextBox)
 - ``Decimals``: The decimals you want to show in the slider ``TextLabel`` or ``TextBox``. Defaults to 1. (Type: number)
-- ``DefaultValue``: The default value you want to set to slider. This will automatically place the slider head to the target value and the TextLabel or TextBox if available. (Type: number)
+- ``DefaultValue``: The default value you want to set to slider. This will automatically place the slider head to the target value and the TextLabel or TextBox if available. Will be set after Slider:Activate() gets called. (Type: number)
+
+There are some functions on ``Slider`` object.
+
+``Slider:Activate()``: Activates the slider and if it's the first run then sets the ``DefaultValue`` if available.
+- Arguments: void
+- Returns: void
+``Slider:Deactivate()``: Deactivates the slider with disconnecting events.
+- Arguments: void
+- Returns: void
 
 There are some events with a ``Slider`` object as well.
 
